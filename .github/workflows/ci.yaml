@@ -72,7 +72,7 @@ jobs:
       - name: Build Docker Model
         run: |
           MODEL_URI=$(cat model_uri.txt)
-          mlflow models build-docker -m "$MODEL_URI" -n credit-risk-model
+          mlflow models build-docker -m "$MODEL_URI" -n credit-risk-model --env-manager local
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
