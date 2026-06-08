@@ -34,7 +34,7 @@ jobs:
 
       - name: Run mlflow project
         run: |
-          mlflow run MLProject -e main --env-manager local
+          mlflow run MLProject -e main --experiment-name "CreditRisk-Basic" --env-manager local
 
       - name: Get latest MLflow run_id
         run: |
