@@ -1,0 +1,89 @@
+name: CI Training Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+
+  train:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Run actions/checkout@v3
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.12.7
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12.7"
+
+      - name: Check Env
+        run: |
+          python --version
+          pip --version
+
+      - name: Install dependencies
+        run: |
+          pip install mlflow==2.19.0
+          pip install pandas numpy scikit-learn scipy matplotlib seaborn
+
+      - name: Run mlflow project
+        run: |
+          mlflow run MLProject -e main
+
+      - name: Get latest MLflow run_id
+        run: |
+          python -c "
+          import mlflow
+          import glob
+          runs = mlflow.search_runs()
+          run_id = runs.iloc[0]['run_id']
+          print('RUN_ID:', run_id)
+          
+          # Cari folder model di mlruns
+          model_paths = glob.glob(f'mlruns/*/{run_id}/artifacts/model')
+          if model_paths:
+              model_uri = model_paths[0]
+          else:
+              model_uri = f'mlruns/0/{run_id}/artifacts/model'
+          print('MODEL_URI:', model_uri)
+          
+          with open('run_id.txt', 'w') as f:
+              f.write(run_id)
+          with open('model_uri.txt', 'w') as f:
+              f.write(model_uri)
+          "
+
+      - name: Install Python dependencies
+        run: |
+          pip install mlflow==2.19.0
+
+      - name: Upload to GitHub
+        uses: actions/upload-artifact@v3
+        with:
+          name: mlflow-artifacts
+          path: mlruns/
+
+      - name: Build Docker Model
+        run: |
+          MODEL_URI=$(cat model_uri.txt)
+          mlflow models build-docker -m "$MODEL_URI" -n credit-risk-model --enable-mlflow-backend
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Tag Docker Image
+        run: |
+          docker tag credit-risk-model:latest ${{ secrets.DOCKER_HUB_USERNAME }}/credit-risk-model:latest
+
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/credit-risk-model:latest

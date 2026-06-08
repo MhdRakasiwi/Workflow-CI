@@ -1,14 +1,18 @@
+name: msml-ci-env
+
 channels:
-- conda-forge
+  - conda-forge
+  - defaults
+
 dependencies:
-- python=3.14.4
-- pip<=26.0.1
-- pip:
-  - mlflow==3.13.0
-  - cloudpickle==3.1.2
-  - numpy==2.4.6
-  - pandas==2.3.3
-  - pyarrow==24.0.0
-  - scikit-learn==1.8.0
-  - scipy==1.17.1
-name: mlflow-env
+  - python=3.12.7
+  - pip
+
+  - pip:
+      - mlflow==2.19.0
+      - pandas
+      - numpy
+      - scikit-learn
+      - scipy
+      - matplotlib
+      - seaborn

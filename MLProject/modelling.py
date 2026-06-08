@@ -27,7 +27,9 @@ from sklearn.metrics import (
 from sklearn.model_selection import train_test_split
 
 # ── Konfigurasi MLflow ────────────────────────────────────────────────────────
-mlflow.set_tracking_uri("http://127.0.0.1:5000/")
+import os
+if "GITHUB_ACTIONS" not in os.environ:
+    mlflow.set_tracking_uri("http://127.0.0.1:5000/")
 mlflow.set_experiment("CreditRisk-Basic")
 
 # ── Load Dataset ──────────────────────────────────────────────────────────────
