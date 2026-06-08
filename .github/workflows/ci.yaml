@@ -34,14 +34,14 @@ jobs:
 
       - name: Run mlflow project
         run: |
-          mlflow run MLProject -e main
+          mlflow run MLProject -e main --env-manager local
 
       - name: Get latest MLflow run_id
         run: |
           python -c "
           import mlflow
           import glob
-          runs = mlflow.search_runs()
+          runs = mlflow.search_runs(search_all_experiments=True)
           run_id = runs.iloc[0]['run_id']
           print('RUN_ID:', run_id)
           
